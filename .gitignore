@@ -1,0 +1,10 @@
+.gradle
+local.properties
+.idea
+.DS_Store
+build
+app/build
+captures
+nesouri-app.iml
+app/app.iml
+gradle
