@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content" android:layout_height="wrap_content"
+    android:padding="@dimen/playback_controls_padding"
+    android:background="@android:color/background_dark">
+
+    <ImageView
+        android:layout_width="@dimen/playback_controls_coverart_size"
+        android:layout_height="@dimen/playback_controls_coverart_size"
+        android:id="@+id/cover_art"
+        android:src="@mipmap/ic_launcher"
+        android:layout_alignParentStart="true" />
+
+
+    <ImageButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/play_pause"
+        android:src="@drawable/ic_stat_av_play_circle_outline"
+        android:tintMode="src_in"
+        android:padding="8dp"
+        android:layout_alignParentEnd="true"
+        android:background="@android:color/background_dark"
+        android:layout_centerVertical="true" />
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toEndOf="@id/cover_art"
+        android:layout_toStartOf="@id/play_pause"
+        android:layout_centerVertical="true"
+        android:layout_marginStart="@dimen/playback_controls_coverart_horizontal_margin">
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:id="@+id/title"
+            android:ellipsize="end"
+            android:textColor="@android:color/primary_text_dark"
+            android:maxLines="1"
+            android:text="Stage 2: Underground Concourse" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:id="@+id/game"
+            android:ellipsize="end"
+            android:textColor="@android:color/secondary_text_dark"
+            android:text="Journey To Silius" />
+
+    </LinearLayout>
+
+</RelativeLayout>

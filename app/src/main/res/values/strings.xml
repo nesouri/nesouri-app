@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Nesouri</string>
 
-    <string name="hello_world">Hello world!</string>
+    <string name="infinite">∞</string>
+    <string name="finite">→</string>
     <string name="action_settings">Settings</string>
 </resources>
