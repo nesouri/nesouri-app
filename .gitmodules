@@ -1,0 +1,7 @@
+[submodule "game-music-emu"]
+	path = external/game-music-emu
+	url = https://github.com/nesouri/game-music-emu.git
+	branch = upstream
+[submodule "nesouri-db"]
+	path = external/nesouri-db
+	url = https://github.com/nesouri/nesouri-db.git

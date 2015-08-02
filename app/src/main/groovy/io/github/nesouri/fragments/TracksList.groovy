@@ -6,7 +6,6 @@ import android.support.v4.app.ListFragment
 import android.support.v4.app.LoaderManager
 import android.support.v4.content.Loader
 import android.support.v4.widget.SimpleCursorAdapter
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -64,7 +63,7 @@ class TracksList extends ListFragment implements LoaderManager.LoaderCallbacks<C
         super.onListItemClick(l, v, position, id)
         final long gameId = arguments.getLong("gameId")
         final Bundle bundle = new Bundle();
-        bundle.putLong("position", id)
+        bundle.putInt("position", (int) id)
         (activity as MainActivity).serviceConnection.mediaController.transportControls.playFromMediaId(gameId as String, bundle)
     }
 }

@@ -5,11 +5,11 @@ import android.support.v4.app.Fragment
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageButton
+import android.widget.TextView
 import com.arasthel.swissknife.SwissKnife
 import com.arasthel.swissknife.annotations.InjectView
 import com.arasthel.swissknife.annotations.OnClick
@@ -24,6 +24,12 @@ class PlaybackControl extends Fragment {
 
     @InjectView(R.id.play_pause)
     ImageButton playPauseButton
+
+    @InjectView(R.id.title)
+    TextView titleText
+
+    @InjectView(R.id.game)
+    TextView gameText
 
     MediaControllerCompat mediaController
 
@@ -74,7 +80,13 @@ class PlaybackControl extends Fragment {
         @Override
         void onMetadataChanged(MediaMetadataCompat metadata) {
             super.onMetadataChanged(metadata)
-            Log.d(TAG, "On metadata changed")
+            final String title = metadata.getText(MediaMetadataCompat.METADATA_KEY_TITLE)
+            if (!title) {
+                titleText.setText(String.format("Track %d", metadata.getLong(MediaMetadataCompat.METADATA_KEY_TRACK_NUMBER)))
+            } else {
+                titleText.setText(title)
+            }
+            gameText.setText(metadata.getText(MediaMetadataCompat.METADATA_KEY_ALBUM))
         }
     }
 }

@@ -30,7 +30,7 @@ class PlaybackService extends Service {
 
     IBinder playbackBinder = new PlaybackBinder()
 
-    Thread thread;
+    PlaybackWorker worker;
 
     AudioManager.OnAudioFocusChangeListener audiofocusListener = new AudioManager.OnAudioFocusChangeListener() {
         @Override
@@ -49,64 +49,21 @@ class PlaybackService extends Service {
         mediaSession = new MediaSessionCompat(this, "nesouri-session", eventReceiver, buttonReceiverIntent)
         mediaSession.playbackState = new PlaybackStateCompat.Builder()
                 .setState(STATE_NONE, PLAYBACK_POSITION_UNKNOWN, 1.0f)
-        .build()
+                .build()
 
         mediaNotificationManager = new PlaybackNotification(this, mediaSession, compatNotificationManager)
 
         final AudioManager am = this.getSystemService(AUDIO_SERVICE) as AudioManager
         am.requestAudioFocus(audiofocusListener, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN)
 
-        thread = new Thread(new io.github.nesouri.PlaybackWorker(this, mediaSession))
-        thread.start();
-
-        /*
-
-        https://developer.android.com/reference/android/media/MediaPlayer.html
-
-
-    private final IntentFilter mAudioNoisyIntentFilter =
-            new IntentFilter(AudioManager.ACTION_AUDIO_BECOMING_NOISY);
-
-    private final BroadcastReceiver mAudioNoisyReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            if (AudioManager.ACTION_AUDIO_BECOMING_NOISY.equals(intent.getAction())) {
-                LogHelper.d(TAG, "Headphones disconnected.");
-                if (isPlaying()) {
-                    Intent i = new Intent(context, MusicService.class);
-                    i.setAction(MusicService.ACTION_CMD);
-                    i.putExtra(MusicService.CMD_NAME, MusicService.CMD_PAUSE);
-                    mService.startService(i);
-                }
-            }
-        }
-    };
-
-
-    // Register when beginning to play:
-    // https://github.com/googlesamples/android-UniversalMusicPlayer/blob/master/mobile/src/main/java/com/example/android/uamp/LocalPlayback.java#L152
-    private void registerAudioNoisyReceiver() {
-        if (!mAudioNoisyReceiverRegistered) {
-            mService.registerReceiver(mAudioNoisyReceiver, mAudioNoisyIntentFilter);
-            mAudioNoisyReceiverRegistered = true;
-        }
-    }
-
-    // Pause/Stop/Destroy etc deal with audiofocus as well
-    private void unregisterAudioNoisyReceiver() {
-        if (mAudioNoisyReceiverRegistered) {
-            mService.unregisterReceiver(mAudioNoisyReceiver);
-            mAudioNoisyReceiverRegistered = false;
-        }
-    }
-         */
+        worker = new io.github.nesouri.PlaybackWorker(this, mediaSession)
+        worker.start();
     }
 
     @Override
     void onDestroy() {
         super.onDestroy()
-        thread.interrupt()
-        thread.join()
+        worker.stop()
 
         AudioManager am = this.getSystemService(AUDIO_SERVICE) as AudioManager
         am.abandonAudioFocus(audiofocusListener)

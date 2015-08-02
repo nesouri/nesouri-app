@@ -35,6 +35,8 @@ class PlaybackNotification extends BroadcastReceiver {
     final PendingIntent playIntent
     final PendingIntent pauseIntent
 
+    MediaMetadataCompat metadata;
+
     static PendingIntent createIntent(final Context context, final String action) {
         final Intent intent = new Intent(action).setPackage(context.packageName)
         return PendingIntent.getBroadcast(context, REQUEST_CODE, intent, PendingIntent.FLAG_CANCEL_CURRENT)
@@ -50,6 +52,7 @@ class PlaybackNotification extends BroadcastReceiver {
         @Override
         void onMetadataChanged(MediaMetadataCompat metadata) {
             super.onMetadataChanged(metadata)
+            PlaybackNotification.this.metadata = metadata
             createNotification()
         }
     }
@@ -98,9 +101,11 @@ class PlaybackNotification extends BroadcastReceiver {
         builder.visibility = NotificationCompat.VISIBILITY_PUBLIC
         builder.showWhen = false
         builder.contentIntent = createContentIntent()
-        builder.contentTitle = "World 1"
-        builder.contentText = "Super Mario Bros 3"
-        builder.subText = "Koji Kondo"
+        if (metadata) {
+            builder.contentTitle = metadata.getText(MediaMetadataCompat.METADATA_KEY_TITLE)
+            builder.contentText = metadata.getText(MediaMetadataCompat.METADATA_KEY_ALBUM)
+            builder.subText = metadata.getText(MediaMetadataCompat.METADATA_KEY_DATE)
+        }
         builder.ongoing = mediaSession.controller.playbackState.state == STATE_PLAYING
 
         final IntentFilter filter = new IntentFilter()

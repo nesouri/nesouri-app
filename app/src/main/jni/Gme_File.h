@@ -1,0 +1,1 @@
+../../../../external/game-music-emu/gme/Gme_File.h

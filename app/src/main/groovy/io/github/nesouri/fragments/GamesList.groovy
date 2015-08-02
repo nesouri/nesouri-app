@@ -9,12 +9,7 @@ import android.support.v4.view.MenuItemCompat
 import android.support.v4.widget.SimpleCursorAdapter
 import android.support.v7.widget.SearchView
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.ListView
 import groovy.transform.CompileStatic
 import io.github.nesouri.AlphabetCursorAdapter

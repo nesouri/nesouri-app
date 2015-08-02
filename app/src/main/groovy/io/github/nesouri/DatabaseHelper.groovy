@@ -2,19 +2,16 @@ package io.github.nesouri
 
 import android.content.Context
 import android.database.Cursor
-import android.database.DatabaseUtils
 import android.database.MatrixCursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.support.v4.content.CursorLoader
 import android.support.v4.content.Loader
-import android.support.v4.database.DatabaseUtilsCompat
 import android.util.Log
 import groovy.transform.CompileStatic
 
 import java.sql.SQLException
 
-import static android.database.DatabaseUtils.sqlEscapeString
 import static java.nio.charset.StandardCharsets.UTF_8
 
 @CompileStatic
@@ -103,7 +100,7 @@ class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     Cursor rawQuery(final String query, final Object... args) {
-        Log.d(TAG, "" + args)
+        Log.d(TAG, String.format("%s %s", query, Arrays.toString(args)));
         return readableDatabase.rawQuery(query, args as String[])
     }
 
@@ -130,10 +127,8 @@ class DatabaseHelper extends SQLiteOpenHelper {
         })
     }
 
-    Loader<Cursor> queryTrackInfo(long gameId) {
-        return new DatabaseLoader(context, {
-            return rawQuery("SELECT title, year, date, url FROM games WHERE game_id=?", gameId)
-        })
+    Cursor queryTrackInfo(int gameId, int track) {
+        return rawQuery("SELECT g.file, g.total_tracks, g.title, g.date, g.year, t.title, t.duration, t.looped FROM games AS g, tracks AS t ON t.game_id=g.game_id WHERE g.game_id=? AND t.track=?", gameId, track)
     }
 
     Loader<Cursor> queryTracks(long gameId) {
