@@ -2,8 +2,7 @@ package io.github.nesouri.engine;
 
 import java.io.Closeable;
 
-public class TrackInfo implements Closeable, AutoCloseable
-{
+public class TrackInfo implements Closeable, AutoCloseable {
 	static {
 		System.loadLibrary("GameMusicEmu");
 	}
@@ -26,6 +25,6 @@ public class TrackInfo implements Closeable, AutoCloseable
 
 	public native String dumper();
 
-    @Override
+	@Override
 	public native void close();
 }
