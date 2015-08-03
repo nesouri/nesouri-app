@@ -90,7 +90,7 @@ public class GamesList extends ListFragment implements LoaderManager.LoaderCallb
 		if (searchView.isShown()) {
 			MenuItemCompat.collapseActionView(searchItem);
 			searchView.setQuery("", false);
-			currentFilter = null;
+			setCurrentFilter(null);
 		}
 
 		getActivity().getSupportFragmentManager().beginTransaction()
@@ -121,21 +121,21 @@ public class GamesList extends ListFragment implements LoaderManager.LoaderCallb
 			@Override
 			public boolean onQueryTextChange(final String newText) {
 				Log.d(TAG, "onQueryTextListener");
-				currentFilter = newText;
+				setCurrentFilter(newText);
 				return true;
 			}
 		});
 
 		searchView.setOnCloseListener(() -> {
 			Log.d(TAG, "onCloseListener");
-			currentFilter = null;
+			setCurrentFilter(null);
 			return false;
 		});
 
 		searchView.setOnQueryTextFocusChangeListener((v, hasFocus) -> {
 			Log.d(TAG, "onQueryTextFocusChangeListener" + hasFocus);
 			if (!hasFocus) {
-				currentFilter = null;
+				setCurrentFilter(null);
 				searchView.clearFocus();
 				MenuItemCompat.collapseActionView(searchItem);
 			}
