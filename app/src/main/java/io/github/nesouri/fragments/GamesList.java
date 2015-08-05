@@ -19,6 +19,7 @@ import android.widget.ListView;
 
 import io.github.nesouri.AlphabetCursorAdapter;
 import io.github.nesouri.DatabaseHelper;
+import io.github.nesouri.Navigation;
 import io.github.nesouri.R;
 
 public class GamesList extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor> {
@@ -81,22 +82,13 @@ public class GamesList extends ListFragment implements LoaderManager.LoaderCallb
 	public void onListItemClick(final ListView l, final View v, final int position, final long id) {
 		super.onListItemClick(l, v, position, id);
 
-		final Bundle args = new Bundle();
-		args.putLong("gameId", id);
-
-		final TracksList tracksList = new TracksList();
-		tracksList.setArguments(args);
-
 		if (searchView.isShown()) {
 			MenuItemCompat.collapseActionView(searchItem);
 			searchView.setQuery("", false);
 			setCurrentFilter(null);
 		}
 
-		getActivity().getSupportFragmentManager().beginTransaction()
-				.addToBackStack(null)
-				.replace(R.id.content_frame, tracksList)
-		.commit();
+		Navigation.openTrackList(getActivity(), id);
 	}
 
 	@Override

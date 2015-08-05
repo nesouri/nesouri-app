@@ -1,6 +1,7 @@
 package io.github.nesouri;
 
 import android.os.StrictMode;
+import android.support.v4.app.FragmentActivity;
 
 import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
 import org.apache.commons.compress.archivers.sevenz.SevenZFile;
@@ -47,5 +48,9 @@ public class Util {
 		if (value == null)
 			return null;
 		return fun.apply(value);
+	}
+
+	public static <T> T findFragmentById(final FragmentActivity activity, final int id) {
+		return (T) activity.getSupportFragmentManager().findFragmentById(R.id.fragment_playback_controls);
 	}
 }
