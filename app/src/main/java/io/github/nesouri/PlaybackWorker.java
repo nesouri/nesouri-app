@@ -103,7 +103,7 @@ public class PlaybackWorker implements Runnable {
 
 	@Override
 	public void run() {
-		while (true) {
+		while (!Thread.currentThread().isInterrupted()) {
 			try {
 				final PlayerState next = this.action.call();
 				Log.d(TAG, "Transitioning from " + this.action + " -> " + next);
@@ -131,7 +131,7 @@ public class PlaybackWorker implements Runnable {
 		}
 
 		protected boolean cancelled() {
-			return next != this;
+			return next != this || Thread.currentThread().isInterrupted();
 		}
 
 		@Override
