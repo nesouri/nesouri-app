@@ -1,17 +1,23 @@
 package io.github.nesouri;
 
 import android.content.Intent;
+import android.media.session.PlaybackState;
 import android.os.Bundle;
+import android.support.v4.media.session.MediaControllerCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import io.github.nesouri.fragments.PlaybackControl;
+import io.github.nesouri.PlaybackServiceConnection.PlaybackServiceConnectionListener;
 
-public class MainActivity extends AppCompatActivity {
+import static io.github.nesouri.Util.findFragmentById;
+
+public class MainActivity extends AppCompatActivity implements PlaybackServiceConnectionListener {
 	private static final String TAG = MainActivity.class.getName();
 
-	private final PlaybackServiceConnection serviceConnection = new PlaybackServiceConnection(this);
+	private PlaybackServiceConnection serviceConnection;
+	private MediaControllerCompat mediaController;
 
 	public PlaybackServiceConnection getServiceConnection() {
 		return serviceConnection;
@@ -20,6 +26,8 @@ public class MainActivity extends AppCompatActivity {
 	@Override
 	public void onCreate(final Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+		serviceConnection = new PlaybackServiceConnection(token -> new MediaControllerCompat(this, token));
 
 		// Util.enableStrictMode()
 
@@ -34,16 +42,16 @@ public class MainActivity extends AppCompatActivity {
 	@Override
 	public void onStart() {
 		super.onStart();
-		final PlaybackControl fragment = Util.findFragmentById(this, R.id.fragment_playback_controls);
-		serviceConnection.setPlaybackControl(fragment);
-		Navigation.hidePlaybackControls(this, R.id.fragment_playback_controls);
+		Navigation.hidePlaybackControls(this);
+		serviceConnection.registerListener(this);
+		serviceConnection.registerListener(findFragmentById(this, R.id.fragment_playback_controls));
 	}
 
 	@Override
 	public void onStop() {
 		super.onStop();
-		serviceConnection.setPlaybackControl(null);
-
+		serviceConnection.unregisterListener(this);
+		serviceConnection.unregisterListener(findFragmentById(this, R.id.fragment_playback_controls));
 	}
 
 	@Override
@@ -64,4 +72,39 @@ public class MainActivity extends AppCompatActivity {
 			return true;
 		return super.onOptionsItemSelected(item);
 	}
+
+	@Override
+	public void onPlaybackServiceConnect(final MediaControllerCompat mediaControllerCompat) {
+		mediaController = mediaControllerCompat;
+		mediaController.registerCallback(mediaControllerCallback);
+	}
+
+	@Override
+	public void onPlaybackServiceDisconnect() {
+		mediaController.unregisterCallback(mediaControllerCallback);
+		mediaController = null;
+	}
+
+	private MediaControllerCompat.Callback mediaControllerCallback = new MediaControllerCompat.Callback() {
+		@Override
+		public void onPlaybackStateChanged(final PlaybackStateCompat state) {
+			super.onPlaybackStateChanged(state);
+			switch (state.getState()) {
+				case PlaybackState.STATE_NONE:
+				case PlaybackState.STATE_ERROR:
+					Navigation.hidePlaybackControls(MainActivity.this);
+					break;
+				default:
+					if (mediaController != null)
+						Navigation.showPlaybackControls(MainActivity.this);
+			}
+		}
+	};
+
+	public MediaControllerCompat.TransportControls getTransportControls() {
+		if (mediaController != null)
+			return mediaController.getTransportControls();
+		return null;
+	}
+
 }

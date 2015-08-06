@@ -27,8 +27,8 @@ public abstract class Navigation {
 		.commit();
 	}
 
-	public static void showPlaybackControls(final FragmentActivity activity, final int fragmentId) {
-		final Fragment fragment = activity.getSupportFragmentManager().findFragmentById(fragmentId);
+	public static void showPlaybackControls(final FragmentActivity activity) {
+		final Fragment fragment = activity.getSupportFragmentManager().findFragmentById(R.id.fragment_playback_controls);
 		activity.getSupportFragmentManager().beginTransaction()
 				.setCustomAnimations(R.anim.abc_slide_in_bottom, R.anim.abc_slide_out_bottom,
 				                     R.anim.abc_slide_in_bottom, R.anim.abc_slide_out_bottom)
@@ -36,8 +36,8 @@ public abstract class Navigation {
 				.commit();
 	}
 
-	public static void hidePlaybackControls(final FragmentActivity activity, final int fragmentId) {
-		final Fragment fragment = activity.getSupportFragmentManager().findFragmentById(fragmentId);
+	public static void hidePlaybackControls(final FragmentActivity activity) {
+		final Fragment fragment = activity.getSupportFragmentManager().findFragmentById(R.id.fragment_playback_controls);
 		activity.getSupportFragmentManager().beginTransaction()
 				.hide(fragment)
 		.commit();

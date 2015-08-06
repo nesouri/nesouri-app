@@ -1,56 +1,66 @@
 package io.github.nesouri;
 
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.ServiceConnection;
 import android.os.IBinder;
-import android.os.RemoteException;
 import android.support.v4.media.session.MediaControllerCompat;
+import android.support.v4.media.session.MediaSessionCompat;
 
-import io.github.nesouri.fragments.PlaybackControl;
+import com.annimon.stream.Stream;
+
+import java.util.HashSet;
+import java.util.Set;
+
+import io.github.nesouri.Util.UnsafeFunction;
 
 public class PlaybackServiceConnection implements ServiceConnection {
-	private static String TAG = PlaybackServiceConnection.class.getName();
+	public interface PlaybackServiceConnectionListener {
+		void onPlaybackServiceConnect(final MediaControllerCompat mediaController);
+		void onPlaybackServiceDisconnect();
+	}
 
-	private final Context context;
-	private PlaybackService playbackService;
-	public MediaControllerCompat mediaController;
-	private PlaybackControl playbackControl;
+	private final UnsafeFunction<MediaSessionCompat.Token, MediaControllerCompat> mediaControllerFactory;
 
-	public PlaybackServiceConnection(Context context) {
-		this.context = context;
+	private MediaControllerCompat mediaController;
+	private Set<PlaybackServiceConnectionListener> listeners = new HashSet<>(2);
+	private Set<PlaybackServiceConnectionListener> connected = new HashSet<>(2);
+
+	public PlaybackServiceConnection(final UnsafeFunction<MediaSessionCompat.Token, MediaControllerCompat> mediaControllerFactory) {
+		this.mediaControllerFactory = mediaControllerFactory;
 	}
 
 	@Override
-	public void onServiceConnected(ComponentName name, IBinder service) {
+	public void onServiceConnected(final ComponentName name, final IBinder service) {
 		final PlaybackService.PlaybackBinder binder = (PlaybackService.PlaybackBinder) service;
-		playbackService = binder.getService();
+		final PlaybackService playbackService = binder.getService();
 		try {
-			mediaController = new MediaControllerCompat(context, playbackService.getSessionToken());
-			if (playbackControl != null)
-				playbackControl.onMediaControllerConnected(mediaController);
-		} catch (RemoteException e) {
-			e.printStackTrace();
+			mediaController = mediaControllerFactory.apply(playbackService.getSessionToken());
+			Stream.of(listeners).forEach(l -> l.onPlaybackServiceConnect(mediaController));
+		} catch (Exception e) {
+			throw new RuntimeException(e);
 		}
 	}
 
 	@Override
-	public void onServiceDisconnected(ComponentName name) {
+	public void onServiceDisconnected(final ComponentName name) {
+		Stream.of(connected).forEach(PlaybackServiceConnectionListener::onPlaybackServiceDisconnect);
+		connected.clear();
 		mediaController = null;
-		playbackService = null;
-		if (playbackControl != null)
-			playbackControl.onMediaControllerDisconnected();
 	}
 
-	private PlaybackControl dispatch(PlaybackControl playbackControl) {
-		if (mediaController != null && playbackControl != null)
-			playbackControl.onMediaControllerConnected(mediaController);
-		return playbackControl;
+	public void registerListener(final PlaybackServiceConnectionListener listener) {
+		listeners.add(listener);
+		if (mediaController != null) {
+			listener.onPlaybackServiceConnect(mediaController);
+			connected.add(listener);
+		}
 	}
 
-	public void setPlaybackControl(PlaybackControl playbackControl) {
-		if (this.playbackControl != null)
-			this.playbackControl.onMediaControllerDisconnected();
-		this.playbackControl = dispatch(playbackControl);
+	public void unregisterListener(final PlaybackServiceConnectionListener listener) {
+		if (mediaController != null) {
+			listener.onPlaybackServiceDisconnect();
+			connected.remove(listener);
+		}
+		listeners.remove(listener);
 	}
 }

@@ -14,14 +14,18 @@ import android.widget.TextView;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import io.github.nesouri.PlaybackServiceConnection.PlaybackServiceConnectionListener;
 import io.github.nesouri.R;
 
+import static android.support.v4.media.MediaMetadataCompat.METADATA_KEY_ALBUM;
+import static android.support.v4.media.MediaMetadataCompat.METADATA_KEY_TITLE;
+import static android.support.v4.media.MediaMetadataCompat.METADATA_KEY_TRACK_NUMBER;
 import static android.support.v4.media.session.PlaybackStateCompat.STATE_PLAYING;
 import static android.support.v4.media.session.PlaybackStateCompat.STATE_SKIPPING_TO_NEXT;
 import static android.support.v4.media.session.PlaybackStateCompat.STATE_SKIPPING_TO_PREVIOUS;
 import static io.github.nesouri.Util.isNullOrEmpty;
 
-public class PlaybackControl extends Fragment {
+public class PlaybackControl extends Fragment implements PlaybackServiceConnectionListener {
 	static final String TAG = PlaybackControl.class.getName();
 
 	@Bind(R.id.play_pause)
@@ -33,7 +37,7 @@ public class PlaybackControl extends Fragment {
 	@Bind(R.id.game)
 	TextView gameText;
 
-	MediaControllerCompat mediaController;
+	private MediaControllerCompat mediaController;
 
 	@Override
 	public View onCreateView(final LayoutInflater inflater, final ViewGroup container, final Bundle savedInstanceState) {
@@ -42,25 +46,31 @@ public class PlaybackControl extends Fragment {
 		return view;
 	}
 
+	@Override
+	public void onPlaybackServiceConnect(final MediaControllerCompat mediaControllerCompat) {
+		mediaController = mediaControllerCompat;
+		mediaController.registerCallback(mediaControllerCallbacks);
+		if (mediaController.getMetadata() != null)
+			mediaControllerCallbacks.onMetadataChanged(mediaController.getMetadata());
+		if (mediaController.getPlaybackState() != null)
+			mediaControllerCallbacks.onPlaybackStateChanged(mediaController.getPlaybackState());
+	}
+
+	@Override
+	public void onPlaybackServiceDisconnect() {
+		mediaController.unregisterCallback(mediaControllerCallbacks);
+		mediaController = null;
+	}
+
 	@OnClick(R.id.play_pause)
 	public void onButtonClicked() {
-		if (mediaController.getPlaybackState().getState() == PlaybackStateCompat.STATE_PLAYING)
+		if (mediaController.getPlaybackState().getState() == STATE_PLAYING)
 			mediaController.getTransportControls().pause();
 		else
 			mediaController.getTransportControls().play();
 	}
 
-	public void onMediaControllerConnected(final MediaControllerCompat mediaController) {
-		this.mediaController = mediaController;
-		this.mediaController.registerCallback(callbacks);
-	}
-
-	public void onMediaControllerDisconnected() {
-		this.mediaController.unregisterCallback(callbacks);
-		this.mediaController = null;
-	}
-
-	private final MediaControllerCompat.Callback callbacks = new MediaControllerCompat.Callback() {
+	private final MediaControllerCompat.Callback mediaControllerCallbacks = new MediaControllerCompat.Callback() {
 		@Override
 		public void onPlaybackStateChanged(final PlaybackStateCompat playbackState) {
 			super.onPlaybackStateChanged(playbackState);

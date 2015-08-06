@@ -65,6 +65,6 @@ public class TracksList extends ListFragment implements LoaderManager.LoaderCall
 		final long gameId = getArguments().getLong("gameId");
 		final Bundle bundle = new Bundle();
 		bundle.putInt("position", (int) id);
-		((MainActivity) getActivity()).getServiceConnection().mediaController.getTransportControls().playFromMediaId(Long.toString(gameId), bundle);
+		((MainActivity) getActivity()).getTransportControls().playFromMediaId(Long.toString(gameId), bundle);
 	}
 }

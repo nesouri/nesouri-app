@@ -3,14 +3,14 @@ package io.github.nesouri;
 import android.os.StrictMode;
 import android.support.v4.app.FragmentActivity;
 
+import com.annimon.stream.function.Function;
+
 import org.apache.commons.compress.archivers.sevenz.SevenZArchiveEntry;
 import org.apache.commons.compress.archivers.sevenz.SevenZFile;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-
-import java8.util.function.Function;
 
 public class Util {
 	public static byte[] extract7zip(final File file) throws IOException {
@@ -52,6 +52,10 @@ public class Util {
 
 	public static <T> T findFragmentById(final FragmentActivity activity, final int id) {
 		return (T) activity.getSupportFragmentManager().findFragmentById(R.id.fragment_playback_controls);
+	}
+
+	public interface UnsafeFunction<T,R> {
+		R apply(T v) throws Exception;
 	}
 
 	public static boolean isNullOrEmpty(final CharSequence value) {
