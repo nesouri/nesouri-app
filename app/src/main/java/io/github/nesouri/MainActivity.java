@@ -11,7 +11,6 @@ import android.view.MenuItem;
 
 import io.github.nesouri.PlaybackServiceConnection.PlaybackServiceConnectionListener;
 
-import static android.media.session.PlaybackState.STATE_BUFFERING;
 import static android.media.session.PlaybackState.STATE_ERROR;
 import static android.media.session.PlaybackState.STATE_NONE;
 import static io.github.nesouri.Util.findFragmentById;
@@ -102,7 +101,6 @@ public class MainActivity extends AppCompatActivity implements PlaybackServiceCo
 				return false;
 			switch (playbackState.getState()) {
 				case STATE_NONE:
-				case STATE_BUFFERING: // TODO: Should show "Buffering..." later
 				case STATE_ERROR:
 					return false;
 				default:
