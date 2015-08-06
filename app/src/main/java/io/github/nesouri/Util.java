@@ -53,4 +53,10 @@ public class Util {
 	public static <T> T findFragmentById(final FragmentActivity activity, final int id) {
 		return (T) activity.getSupportFragmentManager().findFragmentById(R.id.fragment_playback_controls);
 	}
+
+	public static boolean isNullOrEmpty(final CharSequence value) {
+		if (value == null)
+			return true;
+		return value.length() == 0;
+	}
 }

@@ -19,6 +19,7 @@ import io.github.nesouri.R;
 import static android.support.v4.media.session.PlaybackStateCompat.STATE_PLAYING;
 import static android.support.v4.media.session.PlaybackStateCompat.STATE_SKIPPING_TO_NEXT;
 import static android.support.v4.media.session.PlaybackStateCompat.STATE_SKIPPING_TO_PREVIOUS;
+import static io.github.nesouri.Util.isNullOrEmpty;
 
 public class PlaybackControl extends Fragment {
 	static final String TAG = PlaybackControl.class.getName();
@@ -74,16 +75,18 @@ public class PlaybackControl extends Fragment {
 			}
 		}
 
+		private CharSequence formatTitle(final MediaMetadataCompat metadata) {
+			final CharSequence title = metadata.getText(METADATA_KEY_TITLE);
+			if (isNullOrEmpty(title))
+				return String.format("Track %d", metadata.getLong(METADATA_KEY_TRACK_NUMBER));
+			return title;
+		}
+
 		@Override
 		public void onMetadataChanged(final MediaMetadataCompat metadata) {
 			super.onMetadataChanged(metadata);
-			final CharSequence title = metadata.getText(MediaMetadataCompat.METADATA_KEY_TITLE);
-			if (title == null || title.length() == 0) {
-				titleText.setText(String.format("Track %d", metadata.getLong(MediaMetadataCompat.METADATA_KEY_TRACK_NUMBER)));
-			} else {
-				titleText.setText(title);
-			}
-			gameText.setText(metadata.getText(MediaMetadataCompat.METADATA_KEY_ALBUM));
+			titleText.setText(formatTitle(metadata));
+			gameText.setText(metadata.getText(METADATA_KEY_ALBUM));
 		}
 	};
 }
