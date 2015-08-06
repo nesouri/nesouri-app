@@ -1,8 +1,8 @@
 package io.github.nesouri;
 
 import android.content.Intent;
-import android.media.session.PlaybackState;
 import android.os.Bundle;
+import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -11,6 +11,9 @@ import android.view.MenuItem;
 
 import io.github.nesouri.PlaybackServiceConnection.PlaybackServiceConnectionListener;
 
+import static android.media.session.PlaybackState.STATE_BUFFERING;
+import static android.media.session.PlaybackState.STATE_ERROR;
+import static android.media.session.PlaybackState.STATE_NONE;
 import static io.github.nesouri.Util.findFragmentById;
 
 public class MainActivity extends AppCompatActivity implements PlaybackServiceConnectionListener {
@@ -79,6 +82,10 @@ public class MainActivity extends AppCompatActivity implements PlaybackServiceCo
 	public void onPlaybackServiceConnect(final MediaControllerCompat mediaControllerCompat) {
 		mediaController = mediaControllerCompat;
 		mediaController.registerCallback(mediaControllerCallback);
+		if (mediaController.getMetadata() != null)
+			mediaControllerCallback.onMetadataChanged(mediaController.getMetadata());
+		if (mediaController.getPlaybackState() != null)
+			mediaControllerCallback.onPlaybackStateChanged(mediaController.getPlaybackState());
 	}
 
 	@Override
@@ -88,18 +95,38 @@ public class MainActivity extends AppCompatActivity implements PlaybackServiceCo
 	}
 
 	private MediaControllerCompat.Callback mediaControllerCallback = new MediaControllerCompat.Callback() {
+
+		private boolean isPlaying() {
+			final PlaybackStateCompat playbackState = mediaController.getPlaybackState();
+			if (playbackState == null)
+				return false;
+			switch (playbackState.getState()) {
+				case STATE_NONE:
+				case STATE_BUFFERING: // TODO: Should show "Buffering..." later
+				case STATE_ERROR:
+					return false;
+				default:
+					return true;
+			}
+		}
+
+		private void updateVisibility() {
+			if (isPlaying() && mediaController.getMetadata() != null)
+				Navigation.showPlaybackControls(MainActivity.this);
+			else
+				Navigation.hidePlaybackControls(MainActivity.this);
+		}
+
 		@Override
 		public void onPlaybackStateChanged(final PlaybackStateCompat state) {
 			super.onPlaybackStateChanged(state);
-			switch (state.getState()) {
-				case PlaybackState.STATE_NONE:
-				case PlaybackState.STATE_ERROR:
-					Navigation.hidePlaybackControls(MainActivity.this);
-					break;
-				default:
-					if (mediaController != null)
-						Navigation.showPlaybackControls(MainActivity.this);
-			}
+			updateVisibility();
+		}
+
+		@Override
+		public void onMetadataChanged(final MediaMetadataCompat metadata) {
+			super.onMetadataChanged(metadata);
+			updateVisibility();
 		}
 	};
 
