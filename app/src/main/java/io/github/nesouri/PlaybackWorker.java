@@ -29,6 +29,8 @@ import static java.io.File.createTempFile;
 public class PlaybackWorker implements Runnable {
 	private static final String TAG = PlaybackWorker.class.getName();
 
+	private static final String DEFAULT_MIRROR = "http://nsf.joshw.info/";
+
 	private static class Item {
 		private final int gameId;
 		private final int track;
@@ -194,7 +196,7 @@ public class PlaybackWorker implements Runnable {
 			final String[] parts = filename.split("/");
 			final String encoded = URLEncoder.encode(parts[1], "UTF-8").replace("+", "%20");
 
-			final URL url = new URL("http://nsf.joshw.info/" + parts[0] + "/" + encoded);
+			final URL url = new URL(DEFAULT_MIRROR + parts[0] + "/" + encoded);
 
 			final URLConnection conn = url.openConnection();
 			conn.setConnectTimeout(1000);
