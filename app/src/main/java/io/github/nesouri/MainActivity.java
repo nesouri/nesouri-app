@@ -31,7 +31,9 @@ public class MainActivity extends AppCompatActivity implements PlaybackServiceCo
 
 		// Util.enableStrictMode()
 
-		bindService(new Intent(this, PlaybackService.class), serviceConnection, BIND_AUTO_CREATE);
+		final Intent serviceIntent = new Intent(this, PlaybackService.class);
+		startService(serviceIntent);
+		bindService(serviceIntent, serviceConnection, BIND_AUTO_CREATE);
 
 		setContentView(R.layout.activity_main);
 
