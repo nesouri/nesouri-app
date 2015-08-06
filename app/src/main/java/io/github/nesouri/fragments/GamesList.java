@@ -22,6 +22,8 @@ import io.github.nesouri.DatabaseHelper;
 import io.github.nesouri.Navigation;
 import io.github.nesouri.R;
 
+import static io.github.nesouri.Loaders.GAMES_LOADER;
+
 public class GamesList extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor> {
 	static final String TAG = GamesList.class.getName();
 
@@ -33,7 +35,7 @@ public class GamesList extends ListFragment implements LoaderManager.LoaderCallb
 		Log.d(TAG, "Setting current filter");
 		if (value == null || value.length() > 2) {
 			currentFilter = value;
-			getActivity().getSupportLoaderManager().restartLoader(0, null, this);
+			getActivity().getSupportLoaderManager().restartLoader(GAMES_LOADER, null, this);
 		}
 	}
 
@@ -62,14 +64,14 @@ public class GamesList extends ListFragment implements LoaderManager.LoaderCallb
 				getActivity(), R.layout.fragment_games_list_entry,
 				1, new String[] {"title"}, new int[] {R.id.label}
 		));
-		getActivity().getSupportLoaderManager().initLoader(0, null, this);
+		getActivity().getSupportLoaderManager().initLoader(GAMES_LOADER, null, this);
 		return inflater.inflate(R.layout.fragment_games_list, container, false);
 	}
 
 	@Override
 	public void onResume() {
 		super.onResume();
-		getActivity().getSupportLoaderManager().restartLoader(0, null, this);
+		getActivity().getSupportLoaderManager().restartLoader(GAMES_LOADER, null, this);
 	}
 
 	@Override

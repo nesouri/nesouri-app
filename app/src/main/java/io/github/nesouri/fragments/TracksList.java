@@ -15,6 +15,8 @@ import io.github.nesouri.DatabaseHelper;
 import io.github.nesouri.MainActivity;
 import io.github.nesouri.R;
 
+import static io.github.nesouri.Loaders.TRACKS_LOADER;
+
 public class TracksList extends ListFragment implements LoaderManager.LoaderCallbacks<Cursor> {
 	@Override
 	public Loader<Cursor> onCreateLoader(final int id, final Bundle args) {
@@ -40,14 +42,14 @@ public class TracksList extends ListFragment implements LoaderManager.LoaderCall
 				new String[] {"_id", "title", "duration", "looped"},
 				new int[] {R.id.position, R.id.title, R.id.duration, R.id.looped}, 0
 		));
-		getActivity().getSupportLoaderManager().initLoader(1, getArguments(), this);
+		getActivity().getSupportLoaderManager().initLoader(TRACKS_LOADER, getArguments(), this);
 		return inflater.inflate(R.layout.fragment_tracks_list, container, false);
 	}
 
 	@Override
 	public void onResume() {
 		super.onResume();
-		getActivity().getSupportLoaderManager().restartLoader(1, getArguments(), this);
+		getActivity().getSupportLoaderManager().restartLoader(TRACKS_LOADER, getArguments(), this);
 	}
 
 	@Override
