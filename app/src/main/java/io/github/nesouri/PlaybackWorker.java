@@ -154,7 +154,8 @@ public class PlaybackWorker implements Runnable {
 		protected void process() throws Exception {
 			mediaSession.setPlaybackState(PlaybackStates.none());
 			synchronized (PlaybackWorker.this.lock) {
-				PlaybackWorker.this.lock.wait();
+				while (!cancelled())
+					PlaybackWorker.this.lock.wait();
 			}
 		}
 
@@ -175,7 +176,8 @@ public class PlaybackWorker implements Runnable {
 		protected void process() throws Exception {
 			mediaSession.setPlaybackState(PlaybackStates.error(exception.getMessage()));
 			synchronized (PlaybackWorker.this.lock) {
-				PlaybackWorker.this.lock.wait();
+				while (!cancelled())
+					PlaybackWorker.this.lock.wait();
 			}
 		}
 
@@ -297,7 +299,8 @@ public class PlaybackWorker implements Runnable {
 			audioTrack.pause();
 			mediaSession.setPlaybackState(PlaybackStates.paused());
 			synchronized (PlaybackWorker.this.lock) {
-				PlaybackWorker.this.lock.wait();
+				while (!cancelled())
+					PlaybackWorker.this.lock.wait();
 			}
 		}
 
@@ -316,7 +319,8 @@ public class PlaybackWorker implements Runnable {
 			engine.track(item.track() - 1);
 			mediaSession.setPlaybackState(PlaybackStates.stopped());
 			synchronized (PlaybackWorker.this.lock) {
-				PlaybackWorker.this.lock.wait();
+				while (!cancelled())
+					PlaybackWorker.this.lock.wait();
 			}
 		}
 
