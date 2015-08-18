@@ -13,6 +13,7 @@ import io.github.nesouri.PlaybackServiceConnection.PlaybackServiceConnectionList
 
 import static android.media.session.PlaybackState.STATE_ERROR;
 import static android.media.session.PlaybackState.STATE_NONE;
+import static android.media.session.PlaybackState.STATE_STOPPED;
 import static io.github.nesouri.Util.findFragmentById;
 
 public class MainActivity extends AppCompatActivity implements PlaybackServiceConnectionListener {
@@ -102,6 +103,7 @@ public class MainActivity extends AppCompatActivity implements PlaybackServiceCo
 			switch (playbackState.getState()) {
 				case STATE_NONE:
 				case STATE_ERROR:
+				case STATE_STOPPED:
 					return false;
 				default:
 					return true;
