@@ -16,6 +16,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
 
 import io.github.nesouri.engine.EngineType;
 import io.github.nesouri.engine.GameMusicEmu;
@@ -296,11 +297,17 @@ public class PlaybackWorker implements Runnable {
 	private class PausedState extends PlayerState {
 		@Override
 		protected void process() throws Exception {
+			final long transitionToStop = System.currentTimeMillis() + TimeUnit.MINUTES.toMillis(5);
 			audioTrack.pause();
 			mediaSession.setPlaybackState(PlaybackStates.paused());
 			synchronized (PlaybackWorker.this.lock) {
-				while (!cancelled())
-					PlaybackWorker.this.lock.wait();
+				while (!cancelled()) {
+					final long waitingTime = transitionToStop - System.currentTimeMillis();
+					if (waitingTime < 0)
+						transition(new StoppedState());
+					else
+						PlaybackWorker.this.lock.wait(waitingTime);
+				}
 			}
 		}
 
@@ -388,6 +395,12 @@ public class PlaybackWorker implements Runnable {
 		public void onSkipToPrevious() {
 			super.onSkipToPrevious();
 			action.cancel(new SkippingState(SkippingState.PREVIOUS));
+		}
+
+		@Override
+		public void onStop() {
+			super.onStop();
+			action.cancel(new StoppedState());
 		}
 	};
 }
