@@ -42,25 +42,41 @@ public class PlaybackNotification extends BroadcastReceiver {
 	final PendingIntent playIntent;
 	final PendingIntent pauseIntent;
 
-	private MediaMetadataCompat metadata;
-
 	private static PendingIntent createIntent(final Context context, final String action) {
 		final Intent intent = new Intent(action).setPackage(context.getPackageName());
 		return PendingIntent.getBroadcast(context, REQUEST_CODE, intent, PendingIntent.FLAG_CANCEL_CURRENT);
 	}
 
 	private final MediaControllerCompat.Callback callbacks = new MediaControllerCompat.Callback() {
+		private int playbackState = PlaybackStateCompat.STATE_NONE;
+		private MediaMetadataCompat metadata = new MediaMetadataCompat.Builder().build();
+
 		@Override
 		public void onPlaybackStateChanged(final PlaybackStateCompat state) {
 			super.onPlaybackStateChanged(state);
-			createNotification();
+			this.playbackState = state.getState();
+			evaluateNotification();
 		}
 
 		@Override
 		public void onMetadataChanged(final MediaMetadataCompat metadata) {
 			super.onMetadataChanged(metadata);
-			PlaybackNotification.this.metadata = metadata;
-			createNotification();
+			this.metadata = metadata;
+			evaluateNotification();
+		}
+
+		private void evaluateNotification() {
+			switch (playbackState) {
+				case STATE_STOPPED:
+				case STATE_ERROR:
+				case STATE_NONE:
+					service.stopForeground(true);
+					break;
+				default:
+					if (metadata.size() > 0)
+						createNotification(metadata);
+					break;
+			}
 		}
 	};
 
@@ -95,7 +111,7 @@ public class PlaybackNotification extends BroadcastReceiver {
 		}
 	}
 
-	private void createNotification() {
+	private void createNotification(final MediaMetadataCompat metadata) {
 		final Notification notification = new NotificationCompat.Builder(service)
 				.addAction(R.drawable.ic_stat_av_skip_previous, "Prev", prevIntent)
 				.addAction(createPlayPauseAction())
