@@ -17,14 +17,18 @@ import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.support.v7.app.NotificationCompat;
 
+import static android.support.v4.media.session.PlaybackStateCompat.STATE_ERROR;
+import static android.support.v4.media.session.PlaybackStateCompat.STATE_NONE;
 import static android.support.v4.media.session.PlaybackStateCompat.STATE_PLAYING;
 import static android.support.v4.media.session.PlaybackStateCompat.STATE_SKIPPING_TO_NEXT;
 import static android.support.v4.media.session.PlaybackStateCompat.STATE_SKIPPING_TO_PREVIOUS;
+import static android.support.v4.media.session.PlaybackStateCompat.STATE_STOPPED;
 import static io.github.nesouri.Util.unlessNull;
 
 public class PlaybackNotification extends BroadcastReceiver {
 	static final String TAG = PlaybackNotification.class.getName();
 
+	static final String ACTION_STOP = "io.github.nesouri.stop";
 	static final String ACTION_PREV = "io.github.nesouri.next";
 	static final String ACTION_NEXT = "io.github.nesouri.prev";
 	static final String ACTION_PAUSE = "io.github.nesouri.pause";
@@ -37,6 +41,7 @@ public class PlaybackNotification extends BroadcastReceiver {
 	final MediaSessionCompat mediaSession;
 	final NotificationManagerCompat notificationManager;
 
+	final PendingIntent stopIntent;
 	final PendingIntent prevIntent;
 	final PendingIntent nextIntent;
 	final PendingIntent playIntent;
@@ -85,6 +90,7 @@ public class PlaybackNotification extends BroadcastReceiver {
 		this.mediaSession = ses;
 		this.notificationManager = mgr;
 
+		stopIntent = createIntent(svc, ACTION_STOP);
 		prevIntent = createIntent(svc, ACTION_PREV);
 		nextIntent = createIntent(svc, ACTION_NEXT);
 		pauseIntent = createIntent(svc, ACTION_PAUSE);
@@ -127,10 +133,12 @@ public class PlaybackNotification extends BroadcastReceiver {
 				.setContentTitle(unlessNull(metadata, m -> m.getText(MediaMetadataCompat.METADATA_KEY_TITLE)))
 				.setContentText(unlessNull(metadata, m -> m.getText(MediaMetadataCompat.METADATA_KEY_ALBUM)))
 				.setSubText(unlessNull(metadata, m -> m.getText(MediaMetadataCompat.METADATA_KEY_DATE)))
+				.setDeleteIntent(stopIntent)
 				.setOngoing(mediaSession.getController().getPlaybackState().getState() == STATE_PLAYING)
 				.build();
 
 		final IntentFilter filter = new IntentFilter();
+		filter.addAction(ACTION_STOP);
 		filter.addAction(ACTION_PLAY);
 		filter.addAction(ACTION_PAUSE);
 		filter.addAction(ACTION_PREV);
@@ -138,11 +146,16 @@ public class PlaybackNotification extends BroadcastReceiver {
 
 		service.registerReceiver(this, filter);
 		service.startForeground(NOTIFICATION_ID, notification);
+		if (mediaSession.getController().getPlaybackState().getState() != STATE_PLAYING)
+			service.stopForeground(false);
 	}
 
 	@Override
 	public void onReceive(final Context context, final Intent intent) {
 		switch (intent.getAction()) {
+			case ACTION_STOP:
+				mediaSession.getController().getTransportControls().stop();
+				break;
 			case ACTION_PLAY:
 				mediaSession.getController().getTransportControls().play();
 				break;
