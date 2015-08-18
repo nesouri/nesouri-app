@@ -30,15 +30,15 @@ public abstract class Navigation {
 	public static void showPlaybackControls(final FragmentActivity activity) {
 		final Fragment fragment = activity.getSupportFragmentManager().findFragmentById(R.id.fragment_playback_controls);
 		activity.getSupportFragmentManager().beginTransaction()
-				.setCustomAnimations(R.anim.abc_slide_in_bottom, R.anim.abc_slide_out_bottom,
-				                     R.anim.abc_slide_in_bottom, R.anim.abc_slide_out_bottom)
+				.setCustomAnimations(R.anim.abc_slide_in_bottom, R.anim.abc_slide_out_bottom)
 				.show(fragment)
-				.commit();
+		.commit();
 	}
 
 	public static void hidePlaybackControls(final FragmentActivity activity) {
 		final Fragment fragment = activity.getSupportFragmentManager().findFragmentById(R.id.fragment_playback_controls);
 		activity.getSupportFragmentManager().beginTransaction()
+				.setCustomAnimations(R.anim.abc_slide_in_bottom, R.anim.abc_slide_out_bottom)
 				.hide(fragment)
 		.commit();
 	}
